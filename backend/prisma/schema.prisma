@@ -13,3 +13,75 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String    @id @default(uuid())
+  username  String    @unique
+  email     String    @unique
+  password  String
+  role      Role      @default(USER)
+  contests  Contest[] @relation("CreatedContests")
+  submissions Submission[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Contest {
+  id           String     @id @default(uuid())
+  title        String
+  description  String
+  startTime    DateTime
+  endTime      DateTime
+  createdBy    User       @relation("CreatedContests", fields: [createdById], references: [id])
+  createdById  String
+  problems     Problem[]
+  submissions  Submission[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Problem {
+  id          String     @id @default(uuid())
+  title       String
+  statement   String
+  inputFormat String
+  outputFormat String
+  sampleInput String
+  sampleOutput String
+  testCases   Json
+  contest     Contest    @relation(fields: [contestId], references: [id])
+  contestId   String
+  submissions Submission[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Submission {
+  id          String    @id @default(uuid())
+  code        String
+  language    String
+  status      SubmissionStatus
+  score       Int
+  passedTestCases Int
+  totalTestCases Int
+  plagiarized Boolean  @default(false)
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  problem     Problem  @relation(fields: [problemId], references: [id])
+  problemId   String
+  contest     Contest  @relation(fields: [contestId], references: [id])
+  contestId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum SubmissionStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+}

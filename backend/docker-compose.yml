@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  backend:
+    build: .
+    container_name: contest-spy-backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/backend
+      - /backend/node_modules
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/contestdb
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=your_jwt_secret
+    command: npm run dev
+
+  postgres:
+    image: postgres:14
+    restart: always
+    container_name: contest-spy-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: contestdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    container_name: contest-redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  pgdata:
