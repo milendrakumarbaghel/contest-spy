@@ -6,6 +6,8 @@ import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 import authRoutes from './routes/auth.routes';
 import contestRoutes from './routes/contests.routes';
+import problemRoutes from './routes/problems.routes';
+// import submissionRoutes from './routes/submissions.routes';
 import { createServer } from 'http';
 import { initSocket } from './socket';
 import { initRedis } from './config/redis';
@@ -21,10 +23,21 @@ app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
 
+app.use('/api/v1/auth', authRoutes); // Authentication routes
+app.use('/api/v1/contests', contestRoutes); // Contest routes
+app.use('/api/v1/problems', problemRoutes); // Problem routes
+// app.use('/api/v1/submissions', submissionRoutes); // Submission routes
+
 const server = createServer(app);
 initSocket(server);
 initRedis();
 
-server.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT}`);
-});
+// server.listen(PORT, () => {
+//   console.log(`🚀 Server is running on http://localhost:${PORT}`);
+// });
+
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server is running on port ${PORT}`);
+  });
+}
