@@ -5,7 +5,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 import authRoutes from './routes/auth.routes';
-import contestRoutes from './routes/contest.routes';
+import contestRoutes from './routes/contests.routes';
 import { createServer } from 'http';
 import { initSocket } from './socket';
 import { initRedis } from './config/redis';
