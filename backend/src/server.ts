@@ -7,7 +7,7 @@ import { PrismaClient } from '@prisma/client';
 import authRoutes from './routes/auth.routes';
 import contestRoutes from './routes/contests.routes';
 import problemRoutes from './routes/problems.routes';
-// import submissionRoutes from './routes/submissions.routes';
+import submissionRoutes from './routes/submissions.routes';
 import { createServer } from 'http';
 import { initSocket } from './socket';
 import { initRedis } from './config/redis';
@@ -26,7 +26,7 @@ app.use(express.json());
 app.use('/api/v1/auth', authRoutes); // Authentication routes
 app.use('/api/v1/contests', contestRoutes); // Contest routes
 app.use('/api/v1/problems', problemRoutes); // Problem routes
-// app.use('/api/v1/submissions', submissionRoutes); // Submission routes
+app.use('/api/v1/submissions', submissionRoutes); // Submission routes
 
 const server = createServer(app);
 initSocket(server);
