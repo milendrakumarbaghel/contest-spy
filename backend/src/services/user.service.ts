@@ -77,18 +77,30 @@ export const listUsers = async (page = 1, limit = 20, search = '') => {
 };
 
 export const uploadAvatar = async (userId: string, file: Express.Multer.File) => {
-  const filename = `${uuidv4()}${path.extname(file.originalname)}`;
-  const filepath = path.join(__dirname, '..', '..', 'public', 'avatars', filename);
+  try {
+    // Generate unique filename with same extension
+    const filename = `${uuidv4()}${path.extname(file.originalname)}`;
 
-  await fs.writeFile(filepath, file.buffer);
+    // Construct the destination path (e.g., /public/avatars/<filename>)
+    const filepath = path.join(__dirname, '..', '..', 'public', 'avatars', filename);
 
-  const avatarUrl = `/avatars/${filename}`;
-  await prisma.user.update({
-    where: { id: userId },
-    data: { avatar: avatarUrl },
-  });
+    // Save file to disk
+    await fs.writeFile(filepath, file.buffer);
 
-  return avatarUrl;
+    // Construct URL path (used in frontend to access image)
+    const avatarUrl = `/avatars/${filename}`;
+
+    // Update user record
+    await prisma.user.update({
+      where: { id: userId },
+      data: { avatar: avatarUrl },
+    });
+
+    return avatarUrl;
+  } catch (err) {
+    console.error('❌ Avatar upload failed:', err);
+    throw new Error('Failed to upload avatar');
+  }
 };
 
 export const changePassword = async (userId: string, oldPassword: string, newPassword: string) => {
