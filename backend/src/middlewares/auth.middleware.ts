@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
 interface AuthRequest extends Request {
-  user?: { userId: string };
+  user?: { userId: string; role?: string };
 }
 
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -17,5 +17,19 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
     next();
   } catch (err) {
     return res.status(403).json({ message: 'Invalid or expired token' });
+  }
+};
+
+export const requireAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { user } = req;
+
+    if (!user || user.role !== 'ADMIN') {
+      return res.status(403).json({ success: false, message: 'Admin access required' });
+    }
+
+    next();
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 };

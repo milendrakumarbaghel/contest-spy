@@ -14,15 +14,19 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  username  String    @unique
-  email     String    @unique
-  password  String
-  role      Role      @default(USER)
-  contests  Contest[] @relation("CreatedContests")
-  submissions Submission[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id            String       @id @default(uuid())
+  username      String       @unique
+  email         String       @unique
+  password      String
+  role          Role         @default(USER)
+  avatar        String?      // Optional avatar
+  isBanned      Boolean      @default(false) // For banning
+  resetToken    String?      // For password reset
+  resetTokenExp DateTime?    // Token expiration
+  contests      Contest[]    @relation("CreatedContests")
+  submissions   Submission[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 }
 
 enum Role {
