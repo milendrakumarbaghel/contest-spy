@@ -23,14 +23,15 @@ app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
 
-app.use('/api/v1/auth', authRoutes); // Authentication routes
-app.use('/api/v1/contests', contestRoutes); // Contest routes
-app.use('/api/v1/problems', problemRoutes); // Problem routes
-app.use('/api/v1/submissions', submissionRoutes); // Submission routes
 
 const server = createServer(app);
 initSocket(server);
 initRedis();
+
+app.use('/api/v1/auth', authRoutes); // Authentication routes
+app.use('/api/v1/contests', contestRoutes); // Contest routes
+app.use('/api/v1/problems', problemRoutes); // Problem routes
+app.use('/api/v1/submissions', submissionRoutes); // Submission routes
 
 // server.listen(PORT, () => {
 //   console.log(`🚀 Server is running on http://localhost:${PORT}`);

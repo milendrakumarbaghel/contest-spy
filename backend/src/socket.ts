@@ -1,18 +1,28 @@
-import { Server as HTTPServer } from 'http';
-import { Server as SocketIOServer } from 'socket.io';
+import { Server } from 'socket.io';
+import http from 'http';
 
-export const initSocket = (server: HTTPServer) => {
-  const io = new SocketIOServer(server, {
-    cors: {
-      origin: '*',
-    },
+let io: Server;
+
+export const initSocket = (server: http.Server) => {
+  io = new Server(server, {
+    cors: { origin: '*' },
   });
 
   io.on('connection', (socket) => {
-    console.log(`🔌 New client connected: ${socket.id}`);
+    console.log('Client connected:', socket.id);
+
+    socket.on('join-contest', (contestId) => {
+      socket.join(`contest-${contestId}`);
+    });
 
     socket.on('disconnect', () => {
-      console.log(`❌ Client disconnected: ${socket.id}`);
+      console.log('Client disconnected:', socket.id);
     });
   });
+
+  return io;
+};
+
+export const emitLeaderboardUpdate = (contestId: string, data: any) => {
+  io.to(`contest-${contestId}`).emit('leaderboard-update', data);
 };

@@ -12,8 +12,12 @@ export class SubmissionService {
         code: data.code,
         language: data.language,
         userId,
-        problemId,  
+        problemId,
+        contestId: data.contestId, 
         status: 'PENDING',
+        score: 0,
+        passedTestCases: 0,
+        totalTestCases: 0,
         createdAt: new Date(),
       },
     });
