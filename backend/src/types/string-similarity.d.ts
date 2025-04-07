@@ -5,4 +5,12 @@ declare module 'string-similarity' {
       bestMatch: { target: string; rating: number };
       bestMatchIndex: number;
     };
+
+    export interface AuthRequest extends Request {
+      user: {
+        id: string;
+        email?: string;
+        role?: string;
+      };
+    }
   }

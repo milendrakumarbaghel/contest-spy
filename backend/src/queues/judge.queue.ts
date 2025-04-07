@@ -1,7 +1,8 @@
 import { Job } from 'bull';
 import { PrismaClient } from '@prisma/client';
 import { runCodeInDocker } from '../utils/dockerExecutor';
-import { emitLeaderboardUpdate } from '../socket'; 
+import { emitLeaderboardUpdate } from '../socket';
+import { redisClient } from '../config/redis';
 
 const prisma = new PrismaClient();
 
@@ -82,4 +83,6 @@ export const judgeSubmission = async (job: Job) => {
     .sort((a, b) => b.score - a.score);
 
   emitLeaderboardUpdate(contestId, sorted);
+  await redisClient.del(`ranking:${submission.contestId}:*`);
+  await redisClient.del(`myrank:${submission.contestId}:${submission.userId}:*`);
 };
