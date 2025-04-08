@@ -13,6 +13,8 @@ export class AuthService {
       return { status: 400, message: 'User already exists' };
     }
 
+    console.log("abcd")
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: { username, email, password: hashedPassword },
