@@ -3,8 +3,17 @@ import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs/promises';
+import cloudinary from '../config/cloudinary';
+import { Readable } from 'stream';
 
 const prisma = new PrismaClient();
+
+function bufferToStream(buffer: Buffer): NodeJS.ReadableStream {
+  const stream = new Readable();
+  stream.push(buffer);
+  stream.push(null);
+  return stream;
+}
 
 export const getUserById = async (userId: string) => {
   return prisma.user.findUnique({
@@ -78,28 +87,45 @@ export const listUsers = async (page = 1, limit = 20, search = '') => {
 
 export const uploadAvatar = async (userId: string, file: Express.Multer.File) => {
   try {
-    // Generate unique filename with same extension
-    const filename = `${uuidv4()}${path.extname(file.originalname)}`;
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'avatars',
+        public_id: uuidv4(),
+        resource_type: 'image',
+      },
+      async (error, result) => {
+        if (error || !result?.secure_url) {
+          throw new Error('Cloudinary upload failed');
+        }
+      }
+    );
 
-    // Construct the destination path (e.g., /public/avatars/<filename>)
-    const filepath = path.join(__dirname, '..', '..', 'public', 'avatars', filename);
+    const stream = bufferToStream(file.buffer);
+    const result: any = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'avatars',
+          public_id: uuidv4(),
+        },
+        (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
+        }
+      );
 
-    // Save file to disk
-    await fs.writeFile(filepath, file.buffer);
-
-    // Construct URL path (used in frontend to access image)
-    const avatarUrl = `/avatars/${filename}`;
-
-    // Update user record
-    await prisma.user.update({
-      where: { id: userId },
-      data: { avatar: avatarUrl },
+      stream.pipe(uploadStream);
     });
 
-    return avatarUrl;
+    // Update user with avatar URL
+    await prisma.user.update({
+      where: { id: userId },
+      data: { avatar: result.secure_url },
+    });
+
+    return result.secure_url;
   } catch (err) {
-    console.error('❌ Avatar upload failed:', err);
-    throw new Error('Failed to upload avatar');
+    console.error('❌ Cloud avatar upload failed:', err);
+    throw new Error('Failed to upload avatar to cloud');
   }
 };
 
